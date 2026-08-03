@@ -1,0 +1,96 @@
+services:
+
+  # ─────────────────────────────────────────────
+  # 1. Database – MongoDB 7.0
+  # ─────────────────────────────────────────────
+  mongodb:
+    image: mongo:7.0
+    container_name: watchernet_mongodb
+    restart: unless-stopped
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: ${MONGO_ROOT_USER}
+      MONGO_INITDB_ROOT_PASSWORD: ${MONGO_ROOT_PASSWORD}
+      MONGO_INITDB_DATABASE: ${MONGO_DB_NAME}
+    volumes:
+      - mongo_data:/data/db
+    networks:
+      - surveillance-net
+    healthcheck:
+      test: ["CMD", "mongosh", "--quiet", "--eval", "db.adminCommand('ping').ok"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 20s
+
+  # ─────────────────────────────────────────────
+  # 2. Media Server – MediaMTX (RTSP → WebRTC/WHEP)
+  # ─────────────────────────────────────────────
+  mediamtx:
+    image: bluenviron/mediamtx:latest
+    container_name: watchernet_mediamtx
+    restart: unless-stopped
+    ports:
+      - "8554:8554"        # RTSP
+      - "8889:8889"        # WebRTC / WHEP (HTTP)
+      - "8189:8189/udp"    # WebRTC ICE (UDP)
+      - "9997:9997"        # API REST MediaMTX
+    volumes:
+      - ./mediamtx/mediamtx.yml:/mediamtx.yml:ro
+    networks:
+      - surveillance-net
+
+  # ─────────────────────────────────────────────
+  # 3. Backend – FastAPI (Python 3.11)
+  # ─────────────────────────────────────────────
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: watchernet_backend
+    restart: unless-stopped
+    ports:
+      - "8000:8000"
+    environment:
+      MONGO_URI: ${MONGO_URI}
+      MONGO_DB_NAME: ${MONGO_DB_NAME}
+      MEDIAMTX_API_URL: ${MEDIAMTX_API_URL}
+    depends_on:
+      mongodb:
+        condition: service_healthy
+      mediamtx:
+        condition: service_started
+    networks:
+      - surveillance-net
+
+  # ─────────────────────────────────────────────
+  # 4. Frontend – React / Vite
+  # ─────────────────────────────────────────────
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    container_name: watchernet_frontend
+    restart: unless-stopped
+    ports:
+      - "3000:3000"
+    environment:
+      VITE_API_BASE_URL: ${VITE_API_BASE_URL}
+      VITE_WHEP_BASE_URL: ${VITE_WHEP_BASE_URL}
+    depends_on:
+      - backend
+    networks:
+      - surveillance-net
+
+# ─────────────────────────────────────────────
+# Réseaux
+# ─────────────────────────────────────────────
+networks:
+  surveillance-net:
+    driver: bridge
+
+# ─────────────────────────────────────────────
+# Volumes
+# ─────────────────────────────────────────────
+volumes:
+  mongo_data:
+    driver: local

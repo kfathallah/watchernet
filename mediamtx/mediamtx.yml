@@ -1,0 +1,50 @@
+# ─────────────────────────────────────────────────────────────────────────────
+# MediaMTX – Configuration optimisée pour WatcherNet
+# ─────────────────────────────────────────────────────────────────────────────
+
+# ─── Logging ──────────────────────────────────────────────────────────────────
+logLevel: info
+logDestinations: [stdout]
+
+# ─── Authentification ────────────────────────────────────────────────────────
+# Depuis MediaMTX v1.4, authMethod est 'internal' par défaut.
+# On autorise explicitement tout utilisateur (sans mot de passe) à accéder
+# à l'API et aux flux RTSP/WebRTC depuis le réseau Docker interne.
+authMethod: internal
+authInternalUsers:
+  - user: any
+    pass:
+    ips: []
+    permissions:
+      - action: api
+      - action: read
+      - action: publish
+
+# ─── API REST (port 9997) ─────────────────────────────────────────────────────
+# Utilisée par le backend FastAPI pour ajouter et lister les flux
+api: yes
+apiAddress: :9997
+
+# ─── Serveur RTSP (port 8554) ────────────────────────────────────────────────
+# Réception des flux vidéo RTSP des caméras ou simulateurs
+rtsp: yes
+rtspAddress: :8554
+
+# ─── Serveur WebRTC / WHEP (port 8889) ───────────────────────────────────────
+# Diffusion du flux en temps réel vers le lecteur React
+webrtc: yes
+webrtcAddress: :8889
+webrtcEncryption: no
+
+# Serveur STUN externe pour la négociation WebRTC ICE
+webrtcICEServers2:
+  - url: stun:stun.l.google.com:19302
+
+# Port UDP local fixe pour la transmission des paquets vidéo WebRTC
+webrtcLocalUDPAddress: :8189
+
+# ─── Chemins (paths) ─────────────────────────────────────────────────────────
+# Autoriser dynamiquement la création de tous les chemins de caméras
+paths:
+  all_others:
+    source: publisher
