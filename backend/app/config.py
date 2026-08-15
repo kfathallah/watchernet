@@ -10,6 +10,7 @@ class Settings(BaseSettings):
     MONGO_URI: str
     MONGO_DB_NAME: str
     MEDIAMTX_API_URL: str = "http://mediamtx:9997"
+    NATS_URL: str = "nats://watchernet_nats:4222"
 
 
 settings = Settings()

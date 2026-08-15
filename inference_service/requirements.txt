@@ -1,0 +1,8 @@
+onnxruntime
+nats-py
+opencv-python-headless
+numpy
+httpx
+pydantic
+pydantic-settings
+pillow
