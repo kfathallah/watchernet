@@ -1,4 +1,4 @@
-# 🤖 Skills & Technical Competencies: AI & Inference Expert Agent (@agent:ai_inference)
+# Skills & Technical Competencies: AI & Inference 
 
 ## 01. Overview & Core Mission
 L'Agent Inférence AI (@agent:ai_inference) est le spécialiste Computer Vision, Deep Learning et MLOps de l'écosystème WatcherNet. Sa mission exclusive est de concevoir, optimiser et maintenir le microservice d'inférence vidéo asynchrone à très basse latence, capable de capturer des flux RTSP, d'exécuter l'inférence ONNX du modèle YOLOv26 pour la détection d'incendies/fumées et de publier les métadonnées de détection sur le courtier d'événements NATS.
